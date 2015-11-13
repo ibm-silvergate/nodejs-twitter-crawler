@@ -70,31 +70,37 @@ class TwitterCrawler
   post: (args...) ->
     this.callApi('post', args...)
 
-  _getTweets: (params, accumulatedTweets = []) ->
+  _getTweets: (params, options, accumulatedTweets = []) ->
     # Performs tweets crawling
     new Promise (resolve, reject) =>
       # Crawler function
       crawler = (incomingTweets) =>
-        if incomingTweets.length > 1
+        limitReached = options.limit and (accumulatedTweets.length + incomingTweets.length) > options.limit
+        if incomingTweets.length > 1 and not limitReached
           # Got tweets? Let's see if there more out there
           this._getTweets(
               extend(params, maxId : incomingTweets[-1].id -1),
+              options
               accumulatedTweets.concat(incomingTweets)
             ).done(resolve, reject)
         else
-          resolve accumulatedTweets.concat(incomingTweets)
+          output = accumulatedTweets.concat(incomingTweets)
+          if options.limit
+            output = output[0..options.limit]
+          resolve output
+
       # Get tweets
       this.get('statuses/user_timeline', params)
         .done(crawler, reject)
 
-  getTweets: (userId) ->
+  getTweets: (userId, options = {}) ->
     params =
       user_id: userId
       count: MAX_COUNT
       exclude_replies: true
       trim_user: true
       maxId: undefined
-    this._getTweets params
+    this._getTweets params, options
 
   getUser: (userId) ->
     this.get('users/show', { user_id: userId })
