@@ -16,6 +16,7 @@
 
 
 TwitterClient = require 'twitter'
+Promise = require 'promise'
 _extend = require('extend')
 extend = (objects...) -> _extend(true, objects...)
 
@@ -49,7 +50,7 @@ class TwitterCrawler
 
         callback = (err, data) =>
           if err
-            errorMessage = 'Error calling \'' + parameters[0] + '\' api ' +
+            errorMessage = 'Error calling \'' + args[0] + '\' api ' +
               '['+ method.toUpperCase() + '] on instance ' + instance._instance_id + '.'
 
             if err.code == 32 || err[0].code == 32

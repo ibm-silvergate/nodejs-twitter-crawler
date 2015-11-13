@@ -33,12 +33,12 @@ config =
 
   compilation:
     browserify :
-      enabled : true
+      enabled : false
       transform : [
         "babelify"
         "envify"
       ]
-    standalone : true
+    standalone : false
 
     debug : true
 

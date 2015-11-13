@@ -1,12 +1,12 @@
 {
-  "name": "your-component-name",
+  "name": "nodejs-twitter-crawler",
   "version": "0.3.0",
-  "exportName": "YourExportedComponentName",
-  "main": "bin/your-component-name.js",
-  "description": "Your component description",
+  "exportName": "TwitterCrawler",
+  "main": "bin/nodejs-twitter-crawler.js",
+  "description": "NodeJS Crawler for Twitter",
   "repository": {
     "type": "git",
-    "url": "git@github.rtp.raleigh.ibm.com:people-insights-commons/nodejs-demo-component.git"
+    "url": "git@github.rtp.raleigh.ibm.com:people-insights-commons/nodejs-twitter-crawler.git"
   },
   "author": "Ary Pablo Batista <batarypa@ar.ibm.com>",
   "license": "Apache License Version 2.0",
