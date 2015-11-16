@@ -53,7 +53,7 @@ class TwitterCrawler
             errorMessage = 'Error calling \'' + args[0] + '\' api ' +
               '['+ method.toUpperCase() + '] on instance ' + instance._instance_id + '.'
 
-            if err.code == 32 || err[0].code == 32
+            if err.code == 32 || (err[0] && err[0].code == 32)
               # Try again with a different instance
               logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
