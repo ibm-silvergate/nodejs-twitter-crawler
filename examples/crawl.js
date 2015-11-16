@@ -38,25 +38,32 @@ function saveOutput(obj, filename) {
 
 var
   crawler = new TwitterCrawler(credentials, { debug: true }),
-  crawledId = 102793506;
+  crawlList = [
+      'ladygaga',
+      'Oprah',
+      'KingJames'
+    ];
 
-// Get user
-console.info('Obtaining user with id '+crawledId+'...');
-crawler.getUser(crawledId)
-  .then(function (user) {
-    console.info('Obtained info for user', user.name, '(' + user.id + '). Storing in output/'+ crawledId +'user.json');
-    saveOutput(user, crawledId + 'user.json');
 
-    // Crawl tweets
-    console.info('Obtaining tweets...');
-    crawler.getTweets(crawledId, { limit : 500 })
-      .then(function (tweets) {
-        console.info('Obtained', tweets.length, 'tweets for user', user.name, '(' + user.id + '). Storing in output/'+ crawledId +'tweets.json');
-        saveOutput(tweets, crawledId + 'tweets.json');
-        console.info('Crawling finished.');
-      })
-      .catch(bind(console, 'error'))
-      .done()
-  })
-  .catch(bind(console, 'error'))
-  .done()
+crawlList.forEach(function(twitterHandle) {
+  // Get user
+  console.info('Obtaining user with id '+twitterHandle+'...');
+  crawler.getUser(twitterHandle)
+    .then(function (user) {
+      console.info('Obtained info for user', user.name, '(' + user.id + '). Storing in output/'+ twitterHandle +'_user.json');
+      saveOutput(user, twitterHandle + '_user.json');
+
+      // Crawl tweets
+      console.info('Obtaining tweets...');
+      crawler.getTweets(twitterHandle, { limit : 1000 })
+        .then(function (tweets) {
+          console.info('Obtained', tweets.length, 'tweets for user', user.name, '(' + user.id + '). Storing in output/'+ twitterHandle +'_tweets.json');
+          saveOutput(tweets, twitterHandle + '_tweets.json');
+          console.info('Crawling finished.');
+        })
+        .catch(bind(console, 'error'))
+        .done();
+    })
+    .catch(bind(console, 'error'))
+    .done();
+});
