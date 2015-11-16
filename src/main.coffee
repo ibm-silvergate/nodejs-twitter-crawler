@@ -28,6 +28,9 @@ getLogger = (debug) ->
   error : console.error.bind(console),
   debug : if debug then console.info.bind(console) else (->)
 
+isInt = (value) ->
+  !isNaN(value) and parseInt(Number(value)) == value and not isNaN(parseInt(value, 10))
+
 class TwitterCrawler
 
   constructor: (credentials, options = {}) ->
@@ -116,7 +119,8 @@ class TwitterCrawler
 
   getTweets: (userId, options = {}) ->
     params =
-      user_id: userId
+      user_id: (userId if isInt userId)
+      screen_name: (userId.replace('@', '') if not (isInt userId))
       count: MAX_COUNT
       exclude_replies: true
       trim_user: true
@@ -124,6 +128,10 @@ class TwitterCrawler
     this._getTweets params, options
 
   getUser: (userId) ->
-    this.get('users/show', { user_id: userId })
+    params =
+      user_id: (userId if isInt userId)
+      screen_name: (userId.replace('@', '') if not (isInt userId))
+
+    this.get('users/show', params)
 
 module.exports = TwitterCrawler
