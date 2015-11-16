@@ -80,7 +80,7 @@ class TwitterCrawler
         if incomingTweets.length > 1 and not limitReached
           # Got tweets? Let's see if there more out there
           this._getTweets(
-              extend(params, maxId : incomingTweets[-1].id -1),
+              extend(params, maxId : incomingTweets[incomingTweets.length-1].id - 1),
               options
               accumulatedTweets.concat(incomingTweets)
             ).done(resolve, reject)

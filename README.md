@@ -1,31 +1,29 @@
-# NodeJS Demo Component
+# NodeJS Twitter Crawler
 
-Base files for any component used by the [NodeJS Demo Core](https://github.rtp.raleigh.ibm.com/people-insights-commons/nodejs-demo-core).
-Provides some basic behavior to build deployment-ready components and supports
-optional coffee scripting.
+Crawl twitter users and user tweets but using multiple credentials. Credentials
+used in a round-robin mode.
 
-## Setting your component
+## Using the component
 
-You will need to modify the `package.json` in order to provide
-information relevant to your component.
+NodeJS Twitter Crawler is implemented using promises. You will need to use promises
+pattern no add callbacks to crawler method invocations.
 
-The exported component name will be defined by the field `exportName` present in the `package.json` or by the field `name` if the first one is missing.
+```JavaScript
+var crawler = new TwitterCrawler(credentials);
 
-## Build your component
+crawler.getUser(/* User ID */)
+  .then( /* Success Callback */ )
+  .catch( /* Error Callback */ )
+  .done()
 
-You can run `gulp` command to build your component. Binaries will be
-deployed to `bin` folder and the build output in `.build` folder.
-
-Gulp scripts are stored in `.gulp` directory. You can customize your
-build scripts as you wish.
-
-## Keep The Template Updated
-
-Add the base project as a remote repository.
-```sh
-git remote add upstream git@github.rtp.raleigh.ibm.com:people-insights-commons/nodejs-demo-component.git
+crawler.getTweets(/* User ID */, { limit: /* Desired limit, you can omit this */ })
+  .then( /* Success Callback */ )
+  .catch( /* Error Callback */ )
+  .done()
 ```
-And pull updates!
-```sh
-git pull upstream master
-```
+
+## API Methods
+
+The available methods are the following ones:
+  - `getUser   :: ID -> Promise` - Obtain the user status from Twitter by calling `users/show` method from Twitter API. The `then` callback will receive the user information.
+  - `getTweets :: (ID[, CrawlerOptions]) -> Promise` - Obtain User Tweets by calling `statuses/user_timeline` method from Twitter API. The `then` callback will receive a list of tweets.

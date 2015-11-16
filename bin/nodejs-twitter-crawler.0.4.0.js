@@ -109,7 +109,7 @@ TwitterCrawler = (function() {
           limitReached = options.limit && (accumulatedTweets.length + incomingTweets.length) > options.limit;
           if (incomingTweets.length > 1 && !limitReached) {
             return _this._getTweets(extend(params, {
-              maxId: incomingTweets[-1].id(-1)
+              maxId: incomingTweets[incomingTweets.length - 1].id - 1
             }), options, accumulatedTweets.concat(incomingTweets)).done(resolve, reject);
           } else {
             output = accumulatedTweets.concat(incomingTweets);

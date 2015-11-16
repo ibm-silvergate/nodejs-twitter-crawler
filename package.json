@@ -1,6 +1,6 @@
 {
   "name": "nodejs-twitter-crawler",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "exportName": "TwitterCrawler",
   "main": "bin/nodejs-twitter-crawler.js",
   "description": "NodeJS Crawler for Twitter",
@@ -11,12 +11,11 @@
   "author": "Ary Pablo Batista <batarypa@ar.ibm.com>",
   "license": "Apache License Version 2.0",
   "keywords": [
-    "people",
-    "insights",
-    "base",
-    "nodejs",
-    "demo",
-    "component"
+    "twitter",
+    "crawl",
+    "crawling",
+    "crawler",
+    "tweets"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
