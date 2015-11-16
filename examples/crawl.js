@@ -37,7 +37,7 @@ function saveOutput(obj, filename) {
 
 
 var
-  crawler = new TwitterCrawler(credentials),
+  crawler = new TwitterCrawler(credentials, { debug: true }),
   crawledId = 102793506;
 
 // Get user

@@ -23,20 +23,20 @@ extend = (objects...) -> _extend(true, objects...)
 
 MAX_COUNT = 200
 
-getLogger: (debug) ->
+getLogger = (debug) ->
   info : console.info.bind(console),
   error : console.error.bind(console),
-  debug : if debug then console.debug.bind(console) else (->)
+  debug : if debug then console.info.bind(console) else (->)
 
 class TwitterCrawler
 
   constructor: (credentials, options = {}) ->
     this.setOptions(options)
     this.logger = getLogger(this.options.debug)
+    this.count = 0
     this.createClients(credentials)
 
   createClients: (credentials) ->
-    this.count = 0
     this.clients = []
     credentials.forEach (credential) =>
       if credential.enabled?
@@ -91,7 +91,7 @@ class TwitterCrawler
     new Promise (resolve, reject) =>
       # Crawler function
       crawler = (incomingTweets) =>
-        this.logger(
+        this.logger.debug(
             'Obtained', incomingTweets.length, 'for userId',
             params.user_id + '.', 'Total tweets for user:',
             incomingTweets.length + accumulatedTweets.length

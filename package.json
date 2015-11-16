@@ -1,6 +1,6 @@
 {
   "name": "nodejs-twitter-crawler",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "exportName": "TwitterCrawler",
   "main": "bin/nodejs-twitter-crawler.js",
   "description": "NodeJS Crawler for Twitter",
