@@ -22,12 +22,20 @@ extend = (objects...) -> _extend(true, objects...)
 
 
 MAX_COUNT = 200
-logger = console
 
+getLogger: (debug) ->
+  info : console.info.bind(console),
+  error : console.error.bind(console),
+  debug : if debug then console.debug.bind(console) else (->)
 
 class TwitterCrawler
 
-  constructor: (credentials) ->
+  constructor: (credentials, options = {}) ->
+    this.setOptions(options)
+    this.logger = getLogger(this.options.debug)
+    this.createClients(credentials)
+
+  createClients: (credentials) ->
     this.count = 0
     this.clients = []
     credentials.forEach (credential) =>
@@ -36,9 +44,15 @@ class TwitterCrawler
         client._instance_id = this.clients.length
         this.clients.push(client)
 
+  setOptions: (options) ->
+    this.options = extend({
+        debug : false
+      }, options)
+
   getInstance: ->
     instanceIndex = this.count % this.clients.length
     this.count++
+    this.logger.debug('Using twitter credentials nº' + instanceIndex);
     this.clients[instanceIndex]
 
   callApi: (method, args...) ->
@@ -55,10 +69,11 @@ class TwitterCrawler
 
             if err.code == 32 || (err[0] && err[0].code == 32)
               # Try again with a different instance
-              logger.error errorMessage, 'Using another instance.', err
+              this.logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
             else
               # Abort
+              this.logger.error errorMessage, err
               reject err
           else
             resolve data
@@ -76,6 +91,11 @@ class TwitterCrawler
     new Promise (resolve, reject) =>
       # Crawler function
       crawler = (incomingTweets) =>
+        this.logger(
+            'Obtained', incomingTweets.length, 'for userId',
+            params.user_id + '.', 'Total tweets for user:',
+            incomingTweets.length + accumulatedTweets.length
+          )
         limitReached = options.limit and (accumulatedTweets.length + incomingTweets.length) > options.limit
         if incomingTweets.length > 1 and not limitReached
           # Got tweets? Let's see if there more out there
