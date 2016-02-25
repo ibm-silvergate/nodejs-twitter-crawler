@@ -36,6 +36,8 @@ compilation = config.compilation
 component = config.component
 dirs      = config.directories
 
+versionRelease = -> gulpif(component.versioned, gulp.dest(dirs.release))
+
 # Compile task
 gulp.task 'release', ->
   versionName = component.name + '.' + component.version
@@ -43,25 +45,35 @@ gulp.task 'release', ->
   # Deploy JavaScript
   gulp.src(dirs.build + '/main.js')
     .pipe(debug(title: '[release][scripts]'))
-    .pipe(gulpif(compilation.browserify.enabled, browserify(
-      debug : config.debug
-      transform : compilation.browserify.transform
-      standalone : component.exportName if compilation.standalone
-    )))
-    .pipe(rename(versionName + '.js'))     .pipe(gulp.dest(dirs.release))
-    .pipe(rename(component.name + '.js'))  .pipe(gulp.dest(dirs.release))
+
+  if compilation.browserify.enabled?
+    gulp.src(dirs.build + '/main.js')
+      .pipe(browserify(
+        debug : config.debug
+        transform : compilation.browserify.transform
+        standalone : component.exportName if compilation.standalone
+      ))
+      .pipe(gulpif(component.versioned, rename(versionName + '.standalone.js')))  .pipe(versionRelease())
+      .pipe(rename(component.name + '.standalone.js'))                   .pipe(gulp.dest(dirs.release))
+      .pipe(uglify())
+      .pipe(gulpif(component.versioned, rename(versionName + '.standalone.min.js'))) .pipe(versionRelease())
+      .pipe(rename(component.name + '.standalone.min.js'))               .pipe(gulp.dest(dirs.release))
+
+  gulp.src(dirs.build + '/main.js')
+    .pipe(gulpif(component.versioned, rename(versionName + '.js')))      .pipe(versionRelease())
+    .pipe(rename(component.name + '.js'))                                .pipe(gulp.dest(dirs.release))
     .pipe(uglify())
-    .pipe(rename(versionName + '.min.js'))     .pipe(gulp.dest(dirs.release))
-    .pipe(rename(component.name + '.min.js'))  .pipe(gulp.dest(dirs.release))
+    .pipe(gulpif(component.versioned, rename(versionName + '.min.js')))  .pipe(versionRelease())
+    .pipe(rename(component.name + '.min.js'))                            .pipe(gulp.dest(dirs.release))
 
   # Deploy CSS
   gulp.src(dirs.build + '/main.css')
     .pipe(debug(title: '[release][styles]'))
-    .pipe(rename(component.name + '.css')).pipe(gulp.dest(dirs.release))
-    .pipe(rename(versionName + '.css')).pipe(gulp.dest(dirs.release))
+    .pipe(rename(component.name + '.css'))                               .pipe(gulp.dest(dirs.release))
+    .pipe(gulpif(component.versioned, rename(versionName + '.css')))     .pipe(versionRelease())
     .pipe(minifyCss())
-    .pipe(rename(versionName + '.min.css')).pipe(gulp.dest(dirs.release))
-    .pipe(rename(component.name + '.min.css')).pipe(gulp.dest(dirs.release))
+    .pipe(gulpif(component.versioned, rename(versionName + '.min.css'))) .pipe(versionRelease())
+    .pipe(rename(component.name + '.min.css'))                           .pipe(gulp.dest(dirs.release))
 
 
 gulp.task 'compile', ->

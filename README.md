@@ -28,5 +28,6 @@ The available methods are the following ones:
   - `getUser   :: TwitterID -> Promise` - Obtain the user status from Twitter by calling `users/show` method from Twitter API. The `then` callback will receive the user information.
   - `getTweets :: (TwitterID[, CrawlerOptions]) -> Promise` - Obtain User Tweets by calling `statuses/user_timeline` method from Twitter API. The `then` callback will receive a list of tweets.
 
+
 Definitions
   - `TwitterID` is the numeric Twitter ID or the Twitter Handle.
