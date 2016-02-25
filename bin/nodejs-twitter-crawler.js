@@ -19,7 +19,7 @@ var MAX_COUNT, Promise, TwitterClient, TwitterCrawler, _extend, extend, getLogge
 
 TwitterClient = require('twitter');
 
-Promise = require('promise');
+Promise = require('bluebird');
 
 _extend = require('extend');
 

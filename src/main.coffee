@@ -16,7 +16,7 @@
 
 
 TwitterClient = require 'twitter'
-Promise = require 'promise'
+Promise = require 'bluebird'
 _extend = require('extend')
 extend = (objects...) -> _extend(true, objects...)
 

@@ -14,12 +14,10 @@ var crawler = new TwitterCrawler(credentials);
 crawler.getUser(/* User ID */)
   .then( /* Success Callback */ )
   .catch( /* Error Callback */ )
-  .done()
 
 crawler.getTweets(/* User ID */, { limit: /* Desired limit, you can omit this */ })
   .then( /* Success Callback */ )
   .catch( /* Error Callback */ )
-  .done()
 ```
 
 ## API Methods
@@ -31,3 +29,4 @@ The available methods are the following ones:
 
 Definitions
   - `TwitterID` is the numeric Twitter ID or the Twitter Handle.
+  - `Promise` is a promise as defined by [BlueBird package](https://www.npmjs.com/package/bluebird).

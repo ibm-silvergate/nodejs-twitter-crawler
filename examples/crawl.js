@@ -61,9 +61,7 @@ crawlList.forEach(function(twitterHandle) {
           saveOutput(tweets, twitterHandle + '_tweets.json');
           console.info('Crawling finished.');
         })
-        .catch(bind(console, 'error'))
-        .done();
+        .catch(bind(console, 'error'));
     })
-    .catch(bind(console, 'error'))
-    .done();
+    .catch(bind(console, 'error'));
 });
