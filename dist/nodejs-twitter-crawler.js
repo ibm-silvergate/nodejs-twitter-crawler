@@ -14,46 +14,90 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var MAX_COUNT, Promise, TwitterClient, TwitterCrawler, _extend, extend, logger,
+var MAX_COUNT, Promise, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, isArray, isInt, logger,
   slice = [].slice;
 
 TwitterClient = require('twitter');
 
-Promise = require('promise');
+Promise = require('bluebird');
 
-_extend = require('extend');
+_ = require('underscore');
 
-extend = function() {
-  var objects;
-  objects = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-  return _extend.apply(null, [true].concat(slice.call(objects)));
-};
+isArray = _.isArray;
+
+extend = _.extendOwn;
+
+logger = require('winston');
 
 MAX_COUNT = 200;
 
-logger = console;
+isInt = function(value) {
+  return !isNaN(value) && parseInt(Number(value)) === value && !isNaN(parseInt(value, 10));
+};
+
+errorCode = function(error) {
+  return error.code || (error[0] ? error[0].code : 0);
+};
+
+enabled = function(credentials) {
+  return credentials.filter((function(_this) {
+    return function(c) {
+      return c.enabled;
+    };
+  })(this));
+};
 
 TwitterCrawler = (function() {
-  function TwitterCrawler(credentials) {
+  function TwitterCrawler(credentials, options) {
+    if (options == null) {
+      options = {};
+    }
+    this.setOptions(options);
     this.count = 0;
-    this.clients = [];
-    credentials.forEach((function(_this) {
-      return function(credential) {
-        var client;
-        if (credential.enabled != null) {
-          client = new TwitterClient(credential);
-          client._instance_id = _this.clients.length;
-          return _this.clients.push(client);
-        }
-      };
-    })(this));
+    this.createClients(credentials);
   }
 
+  TwitterCrawler.prototype.validateCredentials = function(credentials) {
+    if (!credentials || (isArray(credentials) && enabled(credentials).length === 0)) {
+      throw new Error('You must provide valid credentials');
+    }
+  };
+
+  TwitterCrawler.prototype.createClients = function(credentials) {
+    this.clients = [];
+    this.validateCredentials(credentials);
+    return enabled(credentials).forEach((function(_this) {
+      return function(credential) {
+        var client;
+        client = new TwitterClient(credential);
+        client._instance_id = _this.clients.length;
+        client._valid = true;
+        return _this.clients.push(client);
+      };
+    })(this));
+  };
+
+  TwitterCrawler.prototype.setOptions = function(options) {
+    return this.options = extend({
+      debug: false
+    }, options);
+  };
+
   TwitterCrawler.prototype.getInstance = function() {
-    var instanceIndex;
+    var attempt, instanceIndex;
     instanceIndex = this.count % this.clients.length;
+    attempt = 1;
     this.count++;
-    return this.clients[instanceIndex];
+    while (!this.clients[instanceIndex]._valid && attempt <= this.clients.length) {
+      attempt += 1;
+      this.count++;
+    }
+    if (attempt > this.clients.length) {
+      throw new Error('All instances are invalid! Review your credentials.');
+    } else {
+      logger.debug('Using twitter credentials nº' + instanceIndex);
+      return this.clients[instanceIndex];
+    }
   };
 
   TwitterCrawler.prototype.callApi = function() {
@@ -70,10 +114,20 @@ TwitterCrawler = (function() {
           var errorMessage;
           if (err) {
             errorMessage = 'Error calling \'' + args[0] + '\' api ' + '[' + method.toUpperCase() + '] on instance ' + instance._instance_id + '.';
-            if (err.code === 32 || (err[0] && err[0].code === 32)) {
+            if (errorCode(err) === 32) {
+              errorMessage += ' Error code: ' + errorCode(err) + '.';
+              logger.error(errorMessage, 'Using another instance.', err);
+              _this.callApi.apply(_this, [method].concat(slice.call(args)));
+            }
+            if (errorCode(err) === 89) {
+              errorMessage += ' Error code: ' + errorCode(err) + '.';
+              instance._valid = false;
+              instance._error = err;
               logger.error(errorMessage, 'Using another instance.', err);
               return _this.callApi.apply(_this, [method].concat(slice.call(args)));
             } else {
+              logger.error(errorMessage);
+              logger.error(err);
               return reject(err);
             }
           } else {
@@ -106,6 +160,7 @@ TwitterCrawler = (function() {
         var crawler;
         crawler = function(incomingTweets) {
           var limitReached, output;
+          logger.debug('Obtained', incomingTweets.length, 'for userId', params.user_id + '.', 'Total tweets for user:', incomingTweets.length + accumulatedTweets.length);
           limitReached = options.limit && (accumulatedTweets.length + incomingTweets.length) > options.limit;
           if (incomingTweets.length > 1 && !limitReached) {
             return _this._getTweets(extend(params, {
@@ -130,7 +185,8 @@ TwitterCrawler = (function() {
       options = {};
     }
     params = {
-      user_id: userId,
+      user_id: (isInt(userId) ? userId : void 0),
+      screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0),
       count: MAX_COUNT,
       exclude_replies: true,
       trim_user: true,
@@ -140,9 +196,12 @@ TwitterCrawler = (function() {
   };
 
   TwitterCrawler.prototype.getUser = function(userId) {
-    return this.get('users/show', {
-      user_id: userId
-    });
+    var params;
+    params = {
+      user_id: (isInt(userId) ? userId : void 0),
+      screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0)
+    };
+    return this.get('users/show', params);
   };
 
   return TwitterCrawler;

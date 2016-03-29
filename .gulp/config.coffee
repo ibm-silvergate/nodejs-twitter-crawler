@@ -29,7 +29,7 @@ config =
     versioned: false
 
   directories :
-    release : 'bin'
+    release : 'dist'
     build   : '.build'
 
   sources :

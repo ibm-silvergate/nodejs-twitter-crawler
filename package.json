@@ -1,57 +1,57 @@
 {
-  "name": "nodejs-twitter-crawler",
-  "version": "0.6.0",
-  "exportName": "TwitterCrawler",
-  "main": "bin/nodejs-twitter-crawler.js",
-  "description": "NodeJS Crawler for Twitter",
-  "repository": {
-    "type": "git",
-    "url": "git@github.rtp.raleigh.ibm.com:people-insights-commons/nodejs-twitter-crawler.git"
-  },
-  "author": "Ary Pablo Batista <batarypa@ar.ibm.com>",
-  "license": "Apache License Version 2.0",
-  "keywords": [
-    "twitter",
-    "crawl",
-    "crawling",
-    "crawler",
-    "tweets"
-  ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "bluebird": "^3.3.1",
-    "extend": "~3.0.0",
-    "twitter": "~1.2.5"
-  },
-  "devDependencies": {
-    "babelify": "~7.2.0",
-    "coffee": "~2.0.0",
-    "coffee-script": "^1.10.0",
-    "envify": "~3.4.0",
-    "event-stream": "~3.3.2",
-    "gulp": "~3.9.0",
-    "gulp-browserify": "~0.5.1",
-    "gulp-clean": "~0.3.1",
-    "gulp-coffee": "~2.3.1",
-    "gulp-concat": "~2.6.0",
-    "gulp-debug": "~2.1.0",
-    "gulp-filter": "~3.0.1",
-    "gulp-flatten": "~0.2.0",
-    "gulp-if": "~1.2.5",
-    "gulp-jade": "~1.1.0",
-    "gulp-jslint": "~0.2.2",
-    "gulp-jsonminify": "~1.0.0",
-    "gulp-minify-css": "~1.2.1",
-    "gulp-nodemon": "~2.0.4",
-    "gulp-rename": "~1.2.2",
-    "gulp-sass": "~2.0.4",
-    "gulp-uglify": "~1.4.0",
-    "gulp-util": "~3.0.6",
-    "optional": "~0.1.3",
-    "run-sequence": "^1.1.5",
-    "through2": "~2.0.0"
-  },
-  "private": true
+	"name": "nodejs-twitter-crawler",
+	"version": "0.7.0",
+	"description": "NodeJS Crawler for Twitter",
+	"keywords": [
+		"twitter",
+		"crawl",
+		"crawling",
+		"crawler",
+		"tweets"
+	],
+	"license": "Apache-2.0",
+	"author": "Ary Pablo Batista <batarypa@ar.ibm.com>",
+	"main": "dist/nodejs-twitter-crawler.js",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:ibm-silvergate/nodejs-twitter-crawler.git"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"bluebird": "^3.3.1",
+		"extend": "~3.0.0",
+		"twitter": "~1.2.5",
+		"winston": "^2.2.0"
+	},
+	"devDependencies": {
+		"babelify": "~7.2.0",
+		"coffee": "~2.0.0",
+		"coffee-script": "^1.10.0",
+		"envify": "~3.4.0",
+		"event-stream": "~3.3.2",
+		"gulp": "~3.9.0",
+		"gulp-browserify": "~0.5.1",
+		"gulp-clean": "~0.3.1",
+		"gulp-coffee": "~2.3.1",
+		"gulp-concat": "~2.6.0",
+		"gulp-debug": "~2.1.0",
+		"gulp-filter": "~3.0.1",
+		"gulp-flatten": "~0.2.0",
+		"gulp-if": "~1.2.5",
+		"gulp-jade": "~1.1.0",
+		"gulp-jslint": "~0.2.2",
+		"gulp-jsonminify": "~1.0.0",
+		"gulp-minify-css": "~1.2.1",
+		"gulp-nodemon": "~2.0.4",
+		"gulp-rename": "~1.2.2",
+		"gulp-sass": "~2.0.4",
+		"gulp-uglify": "~1.4.0",
+		"gulp-util": "~3.0.6",
+		"optional": "~0.1.3",
+		"run-sequence": "^1.1.5",
+		"through2": "~2.0.0",
+		"underscore": "^1.8.3"
+	}
 }

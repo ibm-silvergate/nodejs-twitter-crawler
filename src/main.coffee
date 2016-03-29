@@ -17,34 +17,40 @@
 
 TwitterClient = require 'twitter'
 Promise = require 'bluebird'
-_extend = require('extend')
-extend = (objects...) -> _extend(true, objects...)
-
+_ = require 'underscore'
+isArray = _.isArray
+extend = _.extendOwn
+logger = require 'winston'
 
 MAX_COUNT = 200
 
-getLogger = (debug) ->
-  info : console.info.bind(console),
-  error : console.error.bind(console),
-  debug : if debug then console.info.bind(console) else (->)
-
 isInt = (value) ->
   !isNaN(value) and parseInt(Number(value)) == value and not isNaN(parseInt(value, 10))
+
+errorCode = (error) -> error.code || (if error[0] then error[0].code else 0)
+
+enabled = (credentials) -> credentials.filter((c) => c.enabled)
 
 class TwitterCrawler
 
   constructor: (credentials, options = {}) ->
     this.setOptions(options)
-    this.logger = getLogger(this.options.debug)
     this.count = 0
     this.createClients(credentials)
 
+  validateCredentials: (credentials) ->
+    if !credentials || (isArray(credentials) && enabled(credentials).length == 0)
+      throw new Error 'You must provide valid credentials'
+
+
   createClients: (credentials) ->
     this.clients = []
-    credentials.forEach (credential) =>
-      if credential.enabled?
+    this.validateCredentials credentials
+    enabled(credentials)
+      .forEach (credential) =>
         client = new TwitterClient(credential)
         client._instance_id = this.clients.length
+        client._valid = true
         this.clients.push(client)
 
   setOptions: (options) ->
@@ -54,9 +60,18 @@ class TwitterCrawler
 
   getInstance: ->
     instanceIndex = this.count % this.clients.length
+    attempt = 1
     this.count++
-    this.logger.debug('Using twitter credentials nº' + instanceIndex);
-    this.clients[instanceIndex]
+
+    while !this.clients[instanceIndex]._valid && attempt <= this.clients.length
+      attempt +=1
+      this.count++
+
+    if attempt > this.clients.length
+      throw new Error 'All instances are invalid! Review your credentials.'
+    else
+      logger.debug('Using twitter credentials nº' + instanceIndex);
+      this.clients[instanceIndex]
 
   callApi: (method, args...) ->
     if not (method in ['get', 'post'])
@@ -70,13 +85,22 @@ class TwitterCrawler
             errorMessage = 'Error calling \'' + args[0] + '\' api ' +
               '['+ method.toUpperCase() + '] on instance ' + instance._instance_id + '.'
 
-            if err.code == 32 || (err[0] && err[0].code == 32)
+            if errorCode(err) == 32
               # Try again with a different instance
-              this.logger.error errorMessage, 'Using another instance.', err
+              errorMessage += ' Error code: ' + errorCode(err) + '.'
+              logger.error errorMessage, 'Using another instance.', err
+              this.callApi(method, args...)
+            if errorCode(err) == 89
+              errorMessage += ' Error code: ' + errorCode(err) + '.'
+              # Try again with a different instance & disabling
+              instance._valid = false
+              instance._error = err
+              logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
             else
               # Abort
-              this.logger.error errorMessage, err
+              logger.error errorMessage
+              logger.error err
               reject err
           else
             resolve data
@@ -94,7 +118,7 @@ class TwitterCrawler
     new Promise (resolve, reject) =>
       # Crawler function
       crawler = (incomingTweets) =>
-        this.logger.debug(
+        logger.debug(
             'Obtained', incomingTweets.length, 'for userId',
             params.user_id + '.', 'Total tweets for user:',
             incomingTweets.length + accumulatedTweets.length

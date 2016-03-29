@@ -15,15 +15,15 @@
  */
 
 var
-  TwitterCrawler = require('../bin/nodejs-twitter-crawler'),
+  TwitterCrawler = require('../dist/nodejs-twitter-crawler'),
   credentials = [
     {
-      consumer_key : "dG8X0N8iBrR6QYon6njm0Q",
-      consumer_secret : "uNgYsug2jt7Vfe6t8YcdRe0Hi3r90Mkspf8VHY2oLg",
-      access_token_key : "2416405548-BzTMqxLFyyvF5L43chHaePWh3N3zCWYKvAdXD2c",
-      access_token_secret : "6HMO68wFEtuJS3jZI8vkhXOSdVN356rw0idTyZuMYQcry",
+      consumer_key : "<consumer_key>",
+      consumer_secret : "<consumer_secret>",
+      access_token_key : "<access_token_key>",
+      access_token_secret : "<access_token_secret>",
       enabled : true
-    },
+    }
   ],
   fs = require('fs');
 
@@ -32,7 +32,7 @@ function bind(object, method) {
 }
 
 function saveOutput(obj, filename) {
-  fs.writeFile( 'output/' + filename, JSON.stringify(obj, null, '  ') );
+  fs.writeFile( __dirname + '/output/' + filename, JSON.stringify(obj, null, '  ') );
 }
 
 
