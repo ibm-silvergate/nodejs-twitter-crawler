@@ -42,7 +42,7 @@ errorCode = function(error) {
 enabled = function(credentials) {
   return credentials.filter((function(_this) {
     return function(c) {
-      return c.enabled;
+      return (c.enabled == null) || c.enabled;
     };
   })(this));
 };

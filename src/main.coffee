@@ -29,7 +29,7 @@ isInt = (value) ->
 
 errorCode = (error) -> error.code || (if error[0] then error[0].code else 0)
 
-enabled = (credentials) -> credentials.filter((c) => c.enabled)
+enabled = (credentials) -> credentials.filter((c) => (!c.enabled?) || c.enabled)
 
 class TwitterCrawler
 
