@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, isArray, isInt, logger,
-  slice = [].slice;
+var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, isArray, isInt, logger,
+  slice = [].slice,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 TwitterClient = require('twitter');
 
@@ -32,6 +33,10 @@ logger = require('winston');
 MAX_COUNT = 200;
 
 RATE_LIMIT_EXCEEDED = 88;
+
+INVALID_OR_EXPIRED_TOKEN = 89;
+
+CRITICAL_ERRORS = [RATE_LIMIT_EXCEEDED, INVALID_OR_EXPIRED_TOKEN];
 
 isInt = function(value) {
   return !isNaN(value) && parseInt(Number(value)) === value && !isNaN(parseInt(value, 10));
@@ -95,7 +100,7 @@ TwitterCrawler = (function() {
       this.count++;
     }
     if (attempt > this.clients.length) {
-      throw new Error('All instances are invalid! Review your credentials.');
+      return null;
     } else {
       logger.debug('Using twitter credentials nº' + instanceIndex);
       return this.clients[instanceIndex];
@@ -110,33 +115,39 @@ TwitterCrawler = (function() {
     }
     return new Promise((function(_this) {
       return function(resolve, reject) {
-        var callback, instance;
+        var callback, instance, message;
         instance = _this.getInstance();
-        callback = function(err, data) {
-          var errorMessage, ref;
-          if (err) {
-            errorMessage = 'Error calling \'' + args[0] + '\' api ' + '[' + method.toUpperCase() + '] on instance ' + instance._instance_id + '.';
-            if (errorCode(err) === 32) {
-              errorMessage += ' Error code: ' + errorCode(err) + '.';
-              logger.error(errorMessage, 'Using another instance.', err);
-              _this.callApi.apply(_this, [method].concat(slice.call(args)));
-            }
-            if ((ref = errorCode(err)) === RATE_LIMIT_EXCEEDED || ref === 89) {
-              errorMessage += ' Error code: ' + errorCode(err) + '.';
-              instance._valid = false;
-              instance._error = err;
-              logger.error(errorMessage, 'Using another instance.', err);
-              return _this.callApi.apply(_this, [method].concat(slice.call(args)));
+        if (instance != null) {
+          callback = function(err, data) {
+            var errorMessage, ref;
+            if (err) {
+              errorMessage = 'Error calling \'' + args[0] + '\' api ' + '[' + method.toUpperCase() + '] on instance ' + instance._instance_id + '.';
+              if (errorCode(err) === 32) {
+                errorMessage += ' Error code: ' + errorCode(err) + '.';
+                logger.error(errorMessage, 'Using another instance.', err);
+                _this.callApi.apply(_this, [method].concat(slice.call(args))).then(resolve)["catch"](reject);
+              }
+              if (ref = errorCode(err), indexOf.call(CRITICAL_ERRORS, ref) >= 0) {
+                errorMessage += ' Error code: ' + errorCode(err) + '.';
+                instance._valid = false;
+                instance._error = err;
+                logger.error(errorMessage, 'Using another instance.', err);
+                return _this.callApi.apply(_this, [method].concat(slice.call(args))).then(resolve)["catch"](reject);
+              } else {
+                logger.error(errorMessage);
+                logger.error(err);
+                return reject(err);
+              }
             } else {
-              logger.error(errorMessage);
-              logger.error(err);
-              return reject(err);
+              return resolve(data);
             }
-          } else {
-            return resolve(data);
-          }
-        };
-        return instance[method].apply(instance, args.concat([callback]));
+          };
+          return instance[method].apply(instance, args.concat([callback]));
+        } else {
+          message = 'All instances are invalid! Review your credentials';
+          logger.error(message);
+          return reject(new Error(message));
+        }
       };
     })(this));
   };

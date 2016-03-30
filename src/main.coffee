@@ -26,6 +26,13 @@ MAX_COUNT = 200
 
 # Error codes
 RATE_LIMIT_EXCEEDED = 88
+INVALID_OR_EXPIRED_TOKEN = 89
+
+# Error groups
+CRITICAL_ERRORS = [
+    RATE_LIMIT_EXCEEDED
+    INVALID_OR_EXPIRED_TOKEN
+  ]
 
 isInt = (value) ->
   !isNaN(value) and parseInt(Number(value)) == value and not isNaN(parseInt(value, 10))
@@ -71,18 +78,21 @@ class TwitterCrawler
       this.count++
 
     if attempt > this.clients.length
-      throw new Error 'All instances are invalid! Review your credentials.'
+      null
     else
       logger.debug('Using twitter credentials nº' + instanceIndex);
       this.clients[instanceIndex]
+
 
   callApi: (method, args...) ->
     if not (method in ['get', 'post'])
       throw new Error 'Method \'' + method + '\' not implemented.'
 
     new Promise (resolve, reject) =>
-        instance = this.getInstance()
 
+      instance = this.getInstance()
+
+      if instance?
         callback = (err, data) =>
           if err
             errorMessage = 'Error calling \'' + args[0] + '\' api ' +
@@ -93,13 +103,17 @@ class TwitterCrawler
               errorMessage += ' Error code: ' + errorCode(err) + '.'
               logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
-            if errorCode(err) in [RATE_LIMIT_EXCEEDED, 89]
+                .then(resolve)
+                .catch(reject)
+            if errorCode(err) in CRITICAL_ERRORS
               errorMessage += ' Error code: ' + errorCode(err) + '.'
               # Try again with a different instance & disabling
               instance._valid = false
               instance._error = err
               logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
+                .then(resolve)
+                .catch(reject)
             else
               # Abort
               logger.error errorMessage
@@ -109,6 +123,12 @@ class TwitterCrawler
             resolve data
 
         instance[method](args.concat([callback])...)
+
+      else
+        message = 'All instances are invalid! Review your credentials'
+        logger.debug message
+        reject(new Error message)
+
 
   get: (args...) ->
     this.callApi('get', args...)
