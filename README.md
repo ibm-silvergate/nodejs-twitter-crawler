@@ -1,5 +1,10 @@
 # NodeJS Twitter Crawler
 
+![last-release](https://img.shields.io/github/tag/ibm-silvergate/nodejs-twitter-crawler.svg)
+[![npm-version](https://img.shields.io/npm/v/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
+[![npm-license](https://img.shields.io/npm/l/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
+[![npm-downloads](https://img.shields.io/npm/dm/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
+
 Crawl twitter users and user tweets but using multiple credentials. Credentials
 used in a round-robin mode.
 
