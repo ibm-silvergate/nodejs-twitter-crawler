@@ -24,6 +24,9 @@ logger = require 'winston'
 
 MAX_COUNT = 200
 
+# Error codes
+RATE_LIMIT_EXCEEDED = 88
+
 isInt = (value) ->
   !isNaN(value) and parseInt(Number(value)) == value and not isNaN(parseInt(value, 10))
 
@@ -90,7 +93,7 @@ class TwitterCrawler
               errorMessage += ' Error code: ' + errorCode(err) + '.'
               logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
-            if errorCode(err) == 89
+            if errorCode(err) in [RATE_LIMIT_EXCEEDED, 89]
               errorMessage += ' Error code: ' + errorCode(err) + '.'
               # Try again with a different instance & disabling
               instance._valid = false

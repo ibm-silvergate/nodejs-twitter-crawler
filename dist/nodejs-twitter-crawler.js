@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var MAX_COUNT, Promise, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, isArray, isInt, logger,
+var MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, isArray, isInt, logger,
   slice = [].slice;
 
 TwitterClient = require('twitter');
@@ -30,6 +30,8 @@ extend = _.extendOwn;
 logger = require('winston');
 
 MAX_COUNT = 200;
+
+RATE_LIMIT_EXCEEDED = 88;
 
 isInt = function(value) {
   return !isNaN(value) && parseInt(Number(value)) === value && !isNaN(parseInt(value, 10));
@@ -111,7 +113,7 @@ TwitterCrawler = (function() {
         var callback, instance;
         instance = _this.getInstance();
         callback = function(err, data) {
-          var errorMessage;
+          var errorMessage, ref;
           if (err) {
             errorMessage = 'Error calling \'' + args[0] + '\' api ' + '[' + method.toUpperCase() + '] on instance ' + instance._instance_id + '.';
             if (errorCode(err) === 32) {
@@ -119,7 +121,7 @@ TwitterCrawler = (function() {
               logger.error(errorMessage, 'Using another instance.', err);
               _this.callApi.apply(_this, [method].concat(slice.call(args)));
             }
-            if (errorCode(err) === 89) {
+            if ((ref = errorCode(err)) === RATE_LIMIT_EXCEEDED || ref === 89) {
               errorMessage += ' Error code: ' + errorCode(err) + '.';
               instance._valid = false;
               instance._error = err;
