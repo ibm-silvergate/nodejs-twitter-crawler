@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, isArray, isInt, logger,
+var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, getLogger, isArray, isInt, winston,
   slice = [].slice,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -28,7 +28,7 @@ isArray = _.isArray;
 
 extend = _.extendOwn;
 
-logger = require('winston');
+winston = require('winston');
 
 MAX_COUNT = 200;
 
@@ -37,6 +37,20 @@ RATE_LIMIT_EXCEEDED = 88;
 INVALID_OR_EXPIRED_TOKEN = 89;
 
 CRITICAL_ERRORS = [RATE_LIMIT_EXCEEDED, INVALID_OR_EXPIRED_TOKEN];
+
+getLogger = function(options) {
+  if (options == null) {
+    options = {};
+  }
+  return new winston.Logger({
+    transports: [
+      new winston.transports.Console({
+        level: options.debug ? 'debug' : 'info',
+        label: "twitter-crawler"
+      })
+    ]
+  });
+};
 
 isInt = function(value) {
   return !isNaN(value) && parseInt(Number(value)) === value && !isNaN(parseInt(value, 10));
@@ -59,6 +73,7 @@ TwitterCrawler = (function() {
     if (options == null) {
       options = {};
     }
+    this.logger = getLogger(options);
     this.setOptions(options);
     this.count = 0;
     this.createClients(credentials);
@@ -103,7 +118,7 @@ TwitterCrawler = (function() {
     if (attempt > this.clients.length) {
       return null;
     } else {
-      logger.debug('Using twitter credentials nº' + instanceIndex);
+      this.logger.debug('Using twitter credentials nº' + instanceIndex);
       return this.clients[instanceIndex];
     }
   };
@@ -125,18 +140,18 @@ TwitterCrawler = (function() {
               errorMessage = 'Error calling \'' + args[0] + '\' api ' + '[' + method.toUpperCase() + '] on instance ' + instance._instance_id + '.';
               if (errorCode(err) === 32) {
                 errorMessage += ' Error code: ' + errorCode(err) + '.';
-                logger.error(errorMessage, 'Using another instance.', err);
+                _this.logger.error(errorMessage, 'Using another instance.', err);
                 _this.callApi.apply(_this, [method].concat(slice.call(args))).then(resolve)["catch"](reject);
               }
               if (ref = errorCode(err), indexOf.call(CRITICAL_ERRORS, ref) >= 0) {
                 errorMessage += ' Error code: ' + errorCode(err) + '.';
                 instance._valid = false;
                 instance._error = err;
-                logger.error(errorMessage, 'Using another instance.', err);
+                _this.logger.error(errorMessage, 'Using another instance.', err);
                 return _this.callApi.apply(_this, [method].concat(slice.call(args))).then(resolve)["catch"](reject);
               } else {
-                logger.error(errorMessage);
-                logger.error(err);
+                _this.logger.error(errorMessage);
+                _this.logger.error(err);
                 return reject(err);
               }
             } else {
@@ -146,7 +161,7 @@ TwitterCrawler = (function() {
           return instance[method].apply(instance, args.concat([callback]));
         } else {
           message = 'All instances are invalid! Review your credentials';
-          logger.debug(message);
+          _this.logger.debug(message);
           return reject(new Error(message));
         }
       };
@@ -174,7 +189,7 @@ TwitterCrawler = (function() {
         var crawler;
         crawler = function(incomingTweets) {
           var limitReached, output;
-          logger.debug('Obtained', incomingTweets.length, 'for userId', params.user_id + '.', 'Total tweets for user:', incomingTweets.length + accumulatedTweets.length);
+          _this.logger.debug('Obtained', incomingTweets.length, 'for userId', params.user_id + '.', 'Total tweets for user:', incomingTweets.length + accumulatedTweets.length);
           limitReached = options.limit && (accumulatedTweets.length + incomingTweets.length) > options.limit;
           if (incomingTweets.length > 1 && !limitReached) {
             return _this._getTweets(extend(params, {

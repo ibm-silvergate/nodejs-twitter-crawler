@@ -20,7 +20,7 @@ Promise = require 'bluebird'
 _ = require 'underscore'
 isArray = _.isArray
 extend = _.extendOwn
-logger = require 'winston'
+winston = require 'winston'
 
 MAX_COUNT = 200
 
@@ -34,6 +34,14 @@ CRITICAL_ERRORS = [
     INVALID_OR_EXPIRED_TOKEN
   ]
 
+getLogger = (options={}) ->
+  new winston.Logger
+    transports: [
+      new winston.transports.Console
+        level: if options.debug then 'debug' else 'info'
+        label: "twitter-crawler"
+    ]
+
 isInt = (value) ->
   !isNaN(value) and parseInt(Number(value)) == value and not isNaN(parseInt(value, 10))
 
@@ -44,9 +52,10 @@ enabled = (credentials) -> credentials.filter((c) => (!c.enabled?) || c.enabled)
 class TwitterCrawler
 
   constructor: (credentials, options = {}) ->
-    this.setOptions(options)
+    this.logger = getLogger options
+    this.setOptions options
     this.count = 0
-    this.createClients(credentials)
+    this.createClients credentials
 
   validateCredentials: (credentials) ->
     if !credentials || (isArray(credentials) && enabled(credentials).length == 0)
@@ -81,7 +90,7 @@ class TwitterCrawler
     if attempt > this.clients.length
       null
     else
-      logger.debug('Using twitter credentials nº' + instanceIndex);
+      this.logger.debug('Using twitter credentials nº' + instanceIndex);
       this.clients[instanceIndex]
 
 
@@ -102,7 +111,7 @@ class TwitterCrawler
             if errorCode(err) == 32
               # Try again with a different instance
               errorMessage += ' Error code: ' + errorCode(err) + '.'
-              logger.error errorMessage, 'Using another instance.', err
+              this.logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
                 .then(resolve)
                 .catch(reject)
@@ -111,14 +120,14 @@ class TwitterCrawler
               # Try again with a different instance & disabling
               instance._valid = false
               instance._error = err
-              logger.error errorMessage, 'Using another instance.', err
+              this.logger.error errorMessage, 'Using another instance.', err
               this.callApi(method, args...)
                 .then(resolve)
                 .catch(reject)
             else
               # Abort
-              logger.error errorMessage
-              logger.error err
+              this.logger.error errorMessage
+              this.logger.error err
               reject err
           else
             resolve data
@@ -127,7 +136,7 @@ class TwitterCrawler
 
       else
         message = 'All instances are invalid! Review your credentials'
-        logger.debug message
+        this.logger.debug message
         reject(new Error message)
 
 
@@ -142,7 +151,7 @@ class TwitterCrawler
     new Promise (resolve, reject) =>
       # Crawler function
       crawler = (incomingTweets) =>
-        logger.debug(
+        this.logger.debug(
             'Obtained', incomingTweets.length, 'for userId',
             params.user_id + '.', 'Total tweets for user:',
             incomingTweets.length + accumulatedTweets.length
