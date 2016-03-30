@@ -98,6 +98,7 @@ TwitterCrawler = (function() {
     while (!this.clients[instanceIndex]._valid && attempt <= this.clients.length) {
       attempt += 1;
       this.count++;
+      instanceIndex = this.count % this.clients.length;
     }
     if (attempt > this.clients.length) {
       return null;
@@ -145,7 +146,7 @@ TwitterCrawler = (function() {
           return instance[method].apply(instance, args.concat([callback]));
         } else {
           message = 'All instances are invalid! Review your credentials';
-          logger.error(message);
+          logger.debug(message);
           return reject(new Error(message));
         }
       };

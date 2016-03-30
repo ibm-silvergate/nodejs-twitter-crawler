@@ -76,6 +76,7 @@ class TwitterCrawler
     while !this.clients[instanceIndex]._valid && attempt <= this.clients.length
       attempt +=1
       this.count++
+      instanceIndex = this.count % this.clients.length
 
     if attempt > this.clients.length
       null
