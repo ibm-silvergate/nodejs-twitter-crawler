@@ -152,24 +152,33 @@ class TwitterCrawler
     new Promise (resolve, reject) =>
       # Crawler function
       crawler = (incomingTweets) =>
-        this.logger.debug(
-            'Obtained', incomingTweets.length, 'for userId',
-            params.user_id + '.', 'Total tweets for user:',
-            incomingTweets.length + accumulatedTweets.length
-          )
-        limitReached = options.limit and (accumulatedTweets.length + incomingTweets.length) > options.limit
-        if incomingTweets.length > 1 and not limitReached
-          # Got tweets? Let's see if there more out there
-          this._getTweets(
-              extend(params, maxId : incomingTweets[incomingTweets.length-1].id - 1),
-              options
-              accumulatedTweets.concat(incomingTweets)
-            ).done(resolve, reject)
+        user = incomingTweets[0].user
+        if options.min_tweets && user.statuses_count < options.min_tweets
+          # Abort
+          message = [
+            'Not enough tweets for user @', user.screen_name, ':'
+            'expected at least', options.min_tweets
+            'but user has', user.statuses_count
+            'tweets'].join ' '
+          this.logger.error message
+          reject new Error(message)
         else
-          output = accumulatedTweets.concat(incomingTweets)
-          if options.limit
-            output = output[0..options.limit]
-          resolve output
+          this.logger.debug 'Obtained', incomingTweets.length, 'tweets for user',
+              '@' + user.screen_name + '.', 'Total collected tweets for @'+user.screen_name+':',
+              incomingTweets.length + accumulatedTweets.length
+          limitReached = options.limit and (accumulatedTweets.length + incomingTweets.length) > options.limit
+          if incomingTweets.length > 1 and not limitReached
+            # Got tweets? Let's see if there more out there
+            this._getTweets(
+                extend(params, maxId : incomingTweets[incomingTweets.length-1].id - 1),
+                options
+                accumulatedTweets.concat(incomingTweets)
+              ).done(resolve, reject)
+          else
+            output = accumulatedTweets.concat(incomingTweets)
+            if options.limit
+              output = output[0..options.limit]
+            resolve output
 
       # Get tweets
       this.get('statuses/user_timeline', params)
@@ -183,7 +192,6 @@ class TwitterCrawler
         screen_name: (userId.replace('@', '') if not (isInt userId))
         count: MAX_COUNT
         exclude_replies: true
-        trim_user: true
         maxId: undefined
         include_rts:false
     this._getTweets params, options

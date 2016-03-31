@@ -38,4 +38,5 @@ Definitions
   - `TwitterParameters` is an object with parameters to be passed to Twitter API. E.g. [this documentation](https://dev.twitter.com/rest/reference/get/statuses/user_timeline) shows that `GET statuses/user_timeline` can receive parameters such as `user_id` or `exclude_replies`.
   - `Promise` is a promise as defined by [BlueBird package](https://www.npmjs.com/package/bluebird).
   - `CrawlerOptions` is an object containing options for the crawling with attributes:
-    - `limit` sets the max count of tweets to collect.
+    - `limit`: sets the max count of tweets to collect.
+    - `min_tweets`: forces a minimum tweet count. If set and not satisfied, it will result in rejection. 

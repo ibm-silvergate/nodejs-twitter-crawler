@@ -190,19 +190,26 @@ TwitterCrawler = (function() {
       return function(resolve, reject) {
         var crawler;
         crawler = function(incomingTweets) {
-          var limitReached, output;
-          _this.logger.debug('Obtained', incomingTweets.length, 'for userId', params.user_id + '.', 'Total tweets for user:', incomingTweets.length + accumulatedTweets.length);
-          limitReached = options.limit && (accumulatedTweets.length + incomingTweets.length) > options.limit;
-          if (incomingTweets.length > 1 && !limitReached) {
-            return _this._getTweets(extend(params, {
-              maxId: incomingTweets[incomingTweets.length - 1].id - 1
-            }), options, accumulatedTweets.concat(incomingTweets)).done(resolve, reject);
+          var limitReached, message, output, user;
+          user = incomingTweets[0].user;
+          if (options.min_tweets && user.statuses_count < options.min_tweets) {
+            message = ['Not enough tweets for user @', user.screen_name, ':', 'expected at least', options.min_tweets, 'but user has', user.statuses_count, 'tweets'].join(' ');
+            _this.logger.error(message);
+            return reject(new Error(message));
           } else {
-            output = accumulatedTweets.concat(incomingTweets);
-            if (options.limit) {
-              output = output.slice(0, +options.limit + 1 || 9e9);
+            _this.logger.debug('Obtained', incomingTweets.length, 'tweets for user', '@' + user.screen_name + '.', 'Total collected tweets for @' + user.screen_name + ':', incomingTweets.length + accumulatedTweets.length);
+            limitReached = options.limit && (accumulatedTweets.length + incomingTweets.length) > options.limit;
+            if (incomingTweets.length > 1 && !limitReached) {
+              return _this._getTweets(extend(params, {
+                maxId: incomingTweets[incomingTweets.length - 1].id - 1
+              }), options, accumulatedTweets.concat(incomingTweets)).done(resolve, reject);
+            } else {
+              output = accumulatedTweets.concat(incomingTweets);
+              if (options.limit) {
+                output = output.slice(0, +options.limit + 1 || 9e9);
+              }
+              return resolve(output);
             }
-            return resolve(output);
           }
         };
         return _this.get('statuses/user_timeline', params).done(crawler, reject);
@@ -222,7 +229,6 @@ TwitterCrawler = (function() {
         screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0),
         count: MAX_COUNT,
         exclude_replies: true,
-        trim_user: true,
         maxId: void 0,
         include_rts: false
       };
