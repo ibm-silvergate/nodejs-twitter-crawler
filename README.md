@@ -16,11 +16,11 @@ pattern no add callbacks to crawler method invocations.
 ```JavaScript
 var crawler = new TwitterCrawler(credentials);
 
-crawler.getUser(/* User ID */)
+crawler.getUser(/* CrawlerParameters */)
   .then( /* Success Callback */ )
   .catch( /* Error Callback */ )
 
-crawler.getTweets(/* User ID */, { limit: /* Desired limit, you can omit this */ })
+crawler.getTweets(/* CrawlerParameters */, { limit: /* Desired limit, you can omit this */ })
   .then( /* Success Callback */ )
   .catch( /* Error Callback */ )
 ```
@@ -28,10 +28,14 @@ crawler.getTweets(/* User ID */, { limit: /* Desired limit, you can omit this */
 ## API Methods
 
 The available methods are the following ones:
-  - `getUser   :: TwitterID -> Promise` - Obtain the user status from Twitter by calling `users/show` method from Twitter API. The `then` callback will receive the user information.
-  - `getTweets :: (TwitterID[, CrawlerOptions]) -> Promise` - Obtain User Tweets by calling `statuses/user_timeline` method from Twitter API. The `then` callback will receive a list of tweets.
+  - `getUser   :: CrawlerParameters -> Promise` - Obtain the user status from Twitter by calling `users/show` method from Twitter API. The `then` callback will receive the user information.
+  - `getTweets :: (CrawlerParameters[, CrawlerOptions]) -> Promise` - Obtain User Tweets by calling `statuses/user_timeline` method from Twitter API. The `then` callback will receive a list of tweets.
 
 
 Definitions
+  - `CrawlerParameters` can be a `TwitterID` or a `TwitterParameters` object.
   - `TwitterID` is the numeric Twitter ID or the Twitter Handle.
+  - `TwitterParameters` is an object with parameters to be passed to Twitter API. E.g. [this documentation](https://dev.twitter.com/rest/reference/get/statuses/user_timeline) shows that `GET statuses/user_timeline` can receive parameters such as `user_id` or `exclude_replies`.
   - `Promise` is a promise as defined by [BlueBird package](https://www.npmjs.com/package/bluebird).
+  - `CrawlerOptions` is an object containing options for the crawling with attributes:
+    - `limit` sets the max count of tweets to collect.

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, getLogger, isArray, isInt, winston,
+var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, getLogger, isArray, isInt, isString, winston,
   slice = [].slice,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -23,6 +23,8 @@ TwitterClient = require('twitter');
 Promise = require('bluebird');
 
 _ = require('underscore');
+
+isString = _.isString;
 
 isArray = _.isArray;
 
@@ -208,28 +210,35 @@ TwitterCrawler = (function() {
     })(this));
   };
 
-  TwitterCrawler.prototype.getTweets = function(userId, options) {
-    var params;
+  TwitterCrawler.prototype.getTweets = function(params, options) {
+    var userId;
     if (options == null) {
       options = {};
     }
-    params = {
-      user_id: (isInt(userId) ? userId : void 0),
-      screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0),
-      count: MAX_COUNT,
-      exclude_replies: true,
-      trim_user: true,
-      maxId: void 0
-    };
+    if (isString(params) || isInt(params)) {
+      userId = params;
+      params = {
+        user_id: (isInt(userId) ? userId : void 0),
+        screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0),
+        count: MAX_COUNT,
+        exclude_replies: true,
+        trim_user: true,
+        maxId: void 0,
+        include_rts: false
+      };
+    }
     return this._getTweets(params, options);
   };
 
-  TwitterCrawler.prototype.getUser = function(userId) {
-    var params;
-    params = {
-      user_id: (isInt(userId) ? userId : void 0),
-      screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0)
-    };
+  TwitterCrawler.prototype.getUser = function(params) {
+    var userId;
+    if (isString(params) || isInt(params)) {
+      userId = params;
+      params = {
+        user_id: (isInt(userId) ? userId : void 0),
+        screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0)
+      };
+    }
     return this.get('users/show', params);
   };
 

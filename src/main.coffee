@@ -18,6 +18,7 @@
 TwitterClient = require 'twitter'
 Promise = require 'bluebird'
 _ = require 'underscore'
+isString = _.isString
 isArray = _.isArray
 extend = _.extendOwn
 winston = require 'winston'
@@ -174,20 +175,25 @@ class TwitterCrawler
       this.get('statuses/user_timeline', params)
         .done(crawler, reject)
 
-  getTweets: (userId, options = {}) ->
-    params =
-      user_id: (userId if isInt userId)
-      screen_name: (userId.replace('@', '') if not (isInt userId))
-      count: MAX_COUNT
-      exclude_replies: true
-      trim_user: true
-      maxId: undefined
+  getTweets: (params, options = {}) ->
+    if isString(params) || isInt(params)
+      userId = params
+      params =
+        user_id: (userId if isInt userId)
+        screen_name: (userId.replace('@', '') if not (isInt userId))
+        count: MAX_COUNT
+        exclude_replies: true
+        trim_user: true
+        maxId: undefined
+        include_rts:false
     this._getTweets params, options
 
-  getUser: (userId) ->
-    params =
-      user_id: (userId if isInt userId)
-      screen_name: (userId.replace('@', '') if not (isInt userId))
+  getUser: (params) ->
+    if isString(params) || isInt(params)
+      userId = params
+      params =
+        user_id: (userId if isInt userId)
+        screen_name: (userId.replace('@', '') if not (isInt userId))
 
     this.get('users/show', params)
 
