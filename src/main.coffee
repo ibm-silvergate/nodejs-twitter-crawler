@@ -153,6 +153,10 @@ class TwitterCrawler
       # Crawler function
       crawler = (incomingTweets) =>
         user = incomingTweets[0].user
+
+        if options.limit && user.statuses_count < options.limit
+          options.limit = user.statuses_count
+
         if options.min_tweets && user.statuses_count < options.min_tweets
           # Abort
           message = [
@@ -194,6 +198,7 @@ class TwitterCrawler
         exclude_replies: true
         maxId: undefined
         include_rts:false
+
     this._getTweets params, options
 
   getUser: (params) ->

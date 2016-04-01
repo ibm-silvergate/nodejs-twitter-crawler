@@ -192,6 +192,9 @@ TwitterCrawler = (function() {
         crawler = function(incomingTweets) {
           var limitReached, message, output, user;
           user = incomingTweets[0].user;
+          if (options.limit && user.statuses_count < options.limit) {
+            options.limit = user.statuses_count;
+          }
           if (options.min_tweets && user.statuses_count < options.min_tweets) {
             message = ['Not enough tweets for user @', user.screen_name, ':', 'expected at least', options.min_tweets, 'but user has', user.statuses_count, 'tweets'].join(' ');
             _this.logger.error(message);
