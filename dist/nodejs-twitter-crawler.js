@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, getLogger, isArray, isInt, isString, winston,
+var CRITICAL_ERRORS, INVALID_OR_EXPIRED_TOKEN, MAX_COUNT, Promise, RATE_LIMIT_EXCEEDED, TwitterClient, TwitterCrawler, _, enabled, errorCode, extend, getLogger, isArray, isInt, isNaN, isNumericId, isString, winston,
   slice = [].slice,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -23,6 +23,8 @@ TwitterClient = require('twitter');
 Promise = require('bluebird');
 
 _ = require('underscore');
+
+isNaN = _.isNaN;
 
 isString = _.isString;
 
@@ -39,6 +41,10 @@ RATE_LIMIT_EXCEEDED = 88;
 INVALID_OR_EXPIRED_TOKEN = 89;
 
 CRITICAL_ERRORS = [RATE_LIMIT_EXCEEDED, INVALID_OR_EXPIRED_TOKEN];
+
+isNumericId = function(s) {
+  return !isNaN(parseInt(s));
+};
 
 getLogger = function(options) {
   if (options == null) {
@@ -225,11 +231,11 @@ TwitterCrawler = (function() {
     if (options == null) {
       options = {};
     }
-    if (isString(params) || isInt(params)) {
+    if (isString(params) || isNumericId(params)) {
       userId = params;
       params = {
-        user_id: (isInt(userId) ? userId : void 0),
-        screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0),
+        user_id: (isNumericId(userId) ? userId : void 0),
+        screen_name: (!(isNumericId(userId)) ? userId.replace('@', '') : void 0),
         count: MAX_COUNT,
         exclude_replies: true,
         maxId: void 0,
@@ -241,11 +247,11 @@ TwitterCrawler = (function() {
 
   TwitterCrawler.prototype.getUser = function(params) {
     var userId;
-    if (isString(params) || isInt(params)) {
+    if (isString(params) || isNumericId(params)) {
       userId = params;
       params = {
-        user_id: (isInt(userId) ? userId : void 0),
-        screen_name: (!(isInt(userId)) ? userId.replace('@', '') : void 0)
+        user_id: (isNumericId(userId) ? userId : void 0),
+        screen_name: (!(isNumericId(userId)) ? userId.replace('@', '') : void 0)
       };
     }
     return this.get('users/show', params);

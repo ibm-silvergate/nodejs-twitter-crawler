@@ -40,7 +40,7 @@ var
   crawler = new TwitterCrawler(credentials, { debug: true }),
   crawlList = [
       'ladygaga',
-      'Oprah',
+      '19397785',
       'KingJames'
     ];
 

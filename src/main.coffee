@@ -18,6 +18,7 @@
 TwitterClient = require 'twitter'
 Promise = require 'bluebird'
 _ = require 'underscore'
+isNaN = _.isNaN
 isString = _.isString
 isArray = _.isArray
 extend = _.extendOwn
@@ -34,6 +35,9 @@ CRITICAL_ERRORS = [
     RATE_LIMIT_EXCEEDED
     INVALID_OR_EXPIRED_TOKEN
   ]
+
+isNumericId = (s) ->
+  !isNaN(parseInt s)
 
 getLogger = (options={}) ->
   new winston.Logger
@@ -189,11 +193,11 @@ class TwitterCrawler
         .done(crawler, reject)
 
   getTweets: (params, options = {}) ->
-    if isString(params) || isInt(params)
+    if isString(params) || isNumericId(params)
       userId = params
       params =
-        user_id: (userId if isInt userId)
-        screen_name: (userId.replace('@', '') if not (isInt userId))
+        user_id: (userId if isNumericId userId)
+        screen_name: (userId.replace('@', '') if not (isNumericId userId))
         count: MAX_COUNT
         exclude_replies: true
         maxId: undefined
@@ -202,11 +206,11 @@ class TwitterCrawler
     this._getTweets params, options
 
   getUser: (params) ->
-    if isString(params) || isInt(params)
+    if isString(params) || isNumericId(params)
       userId = params
       params =
-        user_id: (userId if isInt userId)
-        screen_name: (userId.replace('@', '') if not (isInt userId))
+        user_id: (userId if isNumericId userId)
+        screen_name: (userId.replace('@', '') if not (isNumericId userId))
 
     this.get('users/show', params)
 
