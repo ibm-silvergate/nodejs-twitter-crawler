@@ -1,0 +1,10 @@
+language: node_js
+sudo: true
+node_js:
+- "6.1"
+script:
+- npm test
+notifications:
+  email: false
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
