@@ -1,8 +1,8 @@
 # NodeJS Twitter Crawler
 
 ![last-release](https://img.shields.io/github/tag/ibm-silvergate/nodejs-twitter-crawler.svg)
-[![npm-version](https://img.shields.io/npm/v/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
-[![npm-license](https://img.shields.io/npm/l/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
+[![npm-version](https://img.shields.io/npm/v/twitter-crawler.svg)](https://www.npmjs.com/package/twitter-crawler)
+[![npm-license](https://img.shields.io/npm/l/twitter-crawler.svg)](https://www.npmjs.com/package/twitter-crawler)
 [![Build Status](https://travis-ci.org/ibm-silvergate/nodejs-twitter-crawler.svg?branch=master)](https://travis-ci.org/ibm-silvergate/nodejs-twitter-crawler)
 [![codecov.io](https://codecov.io/github/ibm-silvergate/nodejs-twitter-crawler/coverage.svg?branch=master)](https://codecov.io/github/ibm-silvergate/nodejs-twitter-crawler?branch=master)
 [![npm-downloads](https://img.shields.io/npm/dm/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
