@@ -17,6 +17,7 @@
 const TwitterCrawler = require('../lib/twitter-crawler');
 const fs = require('fs');
 const log = require('winston');
+const Promise = require('bluebird');
 
 const getEnvCredentials = () =>
   process.env.TWITTER_CREDENTIALS ? JSON.parse(process.env.TWITTER_CREDENTIALS) : [];
@@ -27,7 +28,7 @@ const credentials = [
       consumer_secret : "<consumer_secret>",
       access_token_key : "<access_token_key>",
       access_token_secret : "<access_token_secret>",
-      enabled : true
+      enabled : false
     }
   ].concat(getEnvCredentials());
 
@@ -47,10 +48,10 @@ const crawlList = [
 ];
 
 
-crawlList.forEach((twitterHandle) => {
+module.exports = Promise.all(crawlList.map((twitterHandle) => {
   // Get user
   log.info(`Obtaining user with id ${twitterHandle}...`);
-  crawler.getUser(twitterHandle)
+  return crawler.getUser(twitterHandle)
     .then((user) => {
       log.info(
         `Obtained info for user ${user.name} (${user.id}). ` +
@@ -62,15 +63,15 @@ crawlList.forEach((twitterHandle) => {
       // Crawl tweets
       log.info('Obtaining tweets...');
       return crawler.getTweets(twitterHandle, { min_tweets: 50, limit : 300 })
-    })
-    .then((tweets) => {
-      log.info(
-        `Obtained ${tweets.length} tweets for user ${user.name} (${user.id}). ` +
-        `Storing in output/${twitterHandle}_tweets.json`
-      );
+        .then((tweets) => {
+          log.info(
+            `Obtained ${tweets.length} tweets for user ${user.name} (${user.id}). ` +
+            `Storing in output/${twitterHandle}_tweets.json`
+          );
 
-      saveOutput(tweets, `${twitterHandle}_tweets.json`);
-      log.info('Crawling finished.');
+          saveOutput(tweets, `${twitterHandle}_tweets.json`);
+          log.info('Crawling finished.');
+        });
     })
     .catch(bind(log, 'error'));
-});
+}));
