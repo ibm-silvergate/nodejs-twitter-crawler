@@ -60,4 +60,15 @@ describe('crawler', () => {
       .then(tweets => assert.equal(tweets.length, 30, 'Obtained tweets with upper limit'));
   });
 
+  it('crawl user without tweets', () => {
+    const crawler = new TwitterCrawler(getEnvCredentials());
+    return crawler.getTweets('o', { limit: 10 })
+      .then(tweets => assert.equal(tweets.length, 0, 'Obtained tweets with upper limit'));
+  });
+
+  it('crawl user with less tweets than limit', () => {
+    const crawler = new TwitterCrawler(getEnvCredentials());
+    return crawler.getTweets('e', { limit: 300 })
+      .then(tweets => assert.isBelow(tweets.length, 300, 'Obtained tweets with upper limit'));
+  });
 });
