@@ -1,6 +1,6 @@
 {
   "name": "twitter-crawler",
-  "version": "0.11.0",
+  "version": "1.0.0",
   "description": "NodeJS Crawler for Twitter",
   "keywords": [
     "twitter",
@@ -11,13 +11,15 @@
   ],
   "license": "Apache-2.0",
   "author": "Ary Pablo Batista <batarypa@ar.ibm.com>",
-  "main": "dist/nodejs-twitter-crawler.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:ibm-silvergate/nodejs-twitter-crawler.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run jshint && (npm run codecov || true)",
+    "jshint": "jshint --exclude ./node_modules/",
+    "codecov": "istanbul cover ./node_modules/mocha/bin/_mocha && codecov"
   },
   "dependencies": {
     "bluebird": "^3.3.5",
@@ -26,32 +28,11 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
-    "babelify": "*",
-    "coffee": "*",
-    "coffee-script": "*",
-    "envify": "*",
-    "event-stream": "*",
-    "gulp": "*",
-    "gulp-browserify": "*",
-    "gulp-clean": "*",
-    "gulp-coffee": "*",
-    "gulp-concat": "*",
-    "gulp-debug": "*",
-    "gulp-filter": "*",
-    "gulp-flatten": "*",
-    "gulp-if": "*",
-    "gulp-jade": "*",
-    "gulp-jslint": "*",
-    "gulp-jsonminify": "*",
-    "gulp-minify-css": "*",
-    "gulp-nodemon": "*",
-    "gulp-rename": "*",
-    "gulp-sass": "*",
-    "gulp-uglify": "*",
-    "gulp-util": "*",
-    "optional": "*",
-    "run-sequence": "*",
-    "through2": "*",
+    "chai": "^3.5.0",
+    "codecov": "^1.0.1",
+    "istanbul": "^0.4.3",
+    "jshint": "^2.9.2",
+    "mocha": "^2.4.5",
     "underscore": "*"
   }
 }

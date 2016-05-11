@@ -3,6 +3,7 @@
 ![last-release](https://img.shields.io/github/tag/ibm-silvergate/nodejs-twitter-crawler.svg)
 [![npm-version](https://img.shields.io/npm/v/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
 [![npm-license](https://img.shields.io/npm/l/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
+[![codecov.io](https://codecov.io/github/ibm-silvergate/nodejs-twitter-crawler/coverage.svg?branch=master)](https://codecov.io/github/ibm-silvergate/nodejs-twitter-crawler?branch=master)
 [![npm-downloads](https://img.shields.io/npm/dm/nodejs-twitter-crawler.svg)](https://www.npmjs.com/package/nodejs-twitter-crawler)
 
 Crawl twitter users and user tweets but using multiple credentials. Credentials
@@ -39,4 +40,4 @@ Definitions
   - `Promise` is a promise as defined by [BlueBird package](https://www.npmjs.com/package/bluebird).
   - `CrawlerOptions` is an object containing options for the crawling with attributes:
     - `limit`: sets the max count of tweets to collect.
-    - `min_tweets`: forces a minimum tweet count. If set and not satisfied, it will result in rejection. 
+    - `min_tweets`: forces a minimum tweet count. If set and not satisfied, it will result in rejection.

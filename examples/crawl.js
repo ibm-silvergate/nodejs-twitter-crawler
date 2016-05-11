@@ -14,9 +14,14 @@
  * the License.
  */
 
-var
-  TwitterCrawler = require('../dist/nodejs-twitter-crawler'),
-  credentials = [
+const TwitterCrawler = require('../lib/twitter-crawler');
+const fs = require('fs');
+const log = require('winston');
+
+const getEnvCredentials = () =>
+  process.env.TWITTER_CREDENTIALS ? JSON.parse(process.env.TWITTER_CREDENTIALS) : [];
+
+const credentials = [
     {
       consumer_key : "<consumer_key>",
       consumer_secret : "<consumer_secret>",
@@ -24,44 +29,48 @@ var
       access_token_secret : "<access_token_secret>",
       enabled : true
     }
-  ],
-  fs = require('fs');
+  ].concat(getEnvCredentials());
 
-function bind(object, method) {
-  return object[method].bind(object)
-}
+
+const bind = (object, method) => object[method].bind(object);
 
 function saveOutput(obj, filename) {
-  fs.writeFile( __dirname + '/output/' + filename, JSON.stringify(obj, null, '  ') );
+  fs.writeFile(`${__dirname}/output/${filename}`, JSON.stringify(obj, null, '  '));
 }
 
 
-var
-  crawler = new TwitterCrawler(credentials, { debug: true }),
-  crawlList = [
-      'ladygaga',
-      '19397785',
-      'KingJames'
-    ];
+const crawler = new TwitterCrawler(credentials);
+const crawlList = [
+  'ladygaga',
+  '19397785',
+  'KingJames'
+];
 
 
-crawlList.forEach(function(twitterHandle) {
+crawlList.forEach((twitterHandle) => {
   // Get user
-  console.info('Obtaining user with id '+twitterHandle+'...');
+  log.info(`Obtaining user with id ${twitterHandle}...`);
   crawler.getUser(twitterHandle)
-    .then(function (user) {
-      console.info('Obtained info for user', user.name, '(' + user.id + '). Storing in output/'+ twitterHandle +'_user.json');
-      saveOutput(user, twitterHandle + '_user.json');
+    .then((user) => {
+      log.info(
+        `Obtained info for user ${user.name} (${user.id}). ` +
+        `Storing in output/${twitterHandle}_user.json`
+      );
+
+      saveOutput(user, `${twitterHandle}_user.json`);
 
       // Crawl tweets
-      console.info('Obtaining tweets...');
-      crawler.getTweets(twitterHandle, { limit : 1000 })
-        .then(function (tweets) {
-          console.info('Obtained', tweets.length, 'tweets for user', user.name, '(' + user.id + '). Storing in output/'+ twitterHandle +'_tweets.json');
-          saveOutput(tweets, twitterHandle + '_tweets.json');
-          console.info('Crawling finished.');
-        })
-        .catch(bind(console, 'error'));
+      log.info('Obtaining tweets...');
+      return crawler.getTweets(twitterHandle, { min_tweets: 50, limit : 300 })
     })
-    .catch(bind(console, 'error'));
+    .then((tweets) => {
+      log.info(
+        `Obtained ${tweets.length} tweets for user ${user.name} (${user.id}). ` +
+        `Storing in output/${twitterHandle}_tweets.json`
+      );
+
+      saveOutput(tweets, `${twitterHandle}_tweets.json`);
+      log.info('Crawling finished.');
+    })
+    .catch(bind(log, 'error'));
 });
