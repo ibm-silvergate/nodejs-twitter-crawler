@@ -13,7 +13,7 @@ used in a round-robin mode.
 ## Using the component
 
 NodeJS Twitter Crawler is implemented using promises. You will need to use promises
-pattern no add callbacks to crawler method invocations.
+pattern to add callbacks to crawler method invocations.
 
 ```JavaScript
 var crawler = new TwitterCrawler(credentials);
