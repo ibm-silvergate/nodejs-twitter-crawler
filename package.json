@@ -1,8 +1,10 @@
 {
   "name": "twitter-crawler",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "NodeJS Crawler for Twitter",
-  "engines": { "node" : ">=6.0.0" },
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "keywords": [
     "twitter",
     "crawl",
