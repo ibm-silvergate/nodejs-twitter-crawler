@@ -28,6 +28,7 @@
     "bluebird": "^3.3.5",
     "extend": "^3.0.0",
     "twitter": "^1.2.5",
+    "underscore": "^1.8.3",
     "winston": "^2.2.0"
   },
   "devDependencies": {
@@ -35,7 +36,6 @@
     "codecov": "^1.0.1",
     "istanbul": "^0.4.3",
     "jshint": "^2.9.2",
-    "mocha": "^2.4.5",
-    "underscore": "*"
+    "mocha": "^2.4.5"
   }
 }
